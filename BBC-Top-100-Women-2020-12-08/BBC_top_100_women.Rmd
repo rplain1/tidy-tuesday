@@ -1,0 +1,42 @@
+---
+title: "BBC Top 100 Women of 2020"
+author: "Ryan Plain"
+date: "12/8/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidytuesdayR)
+library(ggimage)
+library(reactable)
+library(paletteer)
+library(htmltools)
+```
+
+```{r load_data, include=FALSE}
+tt_data <- tt_load(2020, "50")
+
+df <- tt_data$women
+```
+
+```{r initial_dive_in}
+
+df %>% 
+  reactable()
+
+make_color_pal <- function(colors, bias=1) {
+  get_color <- colorRamp(colors, bias = bias)
+  function(x) rgb(get_color(x), maxColorValue = 225)
+}
+
+scales::show_col(c("#ffffff", "#f2fbd2", "#c9ecb4", "#93d3ab", "#35b0ab"))
+
+good_color <- make_color_pal(c("#ffffff", "#f2fbd2", "#c9ecb4", "#93d3ab", "#35b0ab"), bias = 2)
+
+
+seq(0.1, 0.9, length.out = 12) %>% 
+  good_color() %>% 
+  scales::show_col()
+```
