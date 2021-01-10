@@ -1,0 +1,40 @@
+---
+title: "Ninja Warrior"
+author: "Ryan Plain"
+date: "12/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(tidytuesdayR)
+```
+
+```{r load_data}
+
+tt_data <- tt_load(2020, "52")
+
+df <- tt_data$`big-mac`
+```
+
+
+```{r}
+
+df %>% 
+  head()
+
+unique(df$currency_code)
+
+```
+
+```{r}
+
+df %>% 
+  ggplot(aes(x=date, y=usd_raw, color=name)) +
+  geom_line(show.legend = FALSE) +
+  theme_bw()
+
+
+```
+
