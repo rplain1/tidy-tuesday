@@ -1,0 +1,171 @@
+---
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggtext)
+library(ggthemes)
+library(gt)
+library(tidytuesdayR)
+```
+
+```{r}
+tt_data <- tt_load(2021, 3)
+artists <- tt_data$artists
+artwork <- tt_data$artwork
+```
+
+```{r}
+df <- left_join(artwork, artists %>% 
+                  select(-url), by=c("artistId"  = "id"))
+
+
+df %>% 
+  sample_n(10) %>% 
+  select(-id, 
+         -accession_number, 
+         -artistId, 
+         -starts_with("yearOf"), 
+         -dimensions,
+         -placeOfDeath,
+         -name,
+         -artistRole,
+         -dateText,
+         -thumbnailCopyright,
+         -inscription,
+         -width,
+         -height,
+         -depth,
+         -units,
+         -dates,
+         -placeOfBirth) %>% 
+  mutate(url = map(url, ~htmltools::a(href = .x, "Link")),
+         url = map(url, ~gt::html(as.character(.x)))) %>% 
+  #head() %>% 
+  gt(
+    groupname_col = "artist",
+    rowname_col = "title"
+  ) %>% 
+  tab_header(
+    title = md("**Tate Art Museum**"),
+    subtitle = md("A Collection of Artwork")
+  ) %>% 
+  tab_style(
+    style = cell_borders(
+      sides = c("top","bottom"),
+      color="black",
+      weight = px(3)
+    ),
+    locations = 
+      list(
+        cells_body(
+          columns =everything()
+        )
+      )
+  ) %>% 
+  text_transform(
+    locations = cells_body(vars(thumbnailUrl)),
+    fn = function(x) {
+      web_image(
+        x,
+        height = as.numeric(x)
+      )
+    }
+  ) %>% 
+  cols_move_to_start(vars(thumbnailUrl)) %>% 
+  rmarkdown::paged_table()
+  
+
+
+
+
+```
+
+```{r}
+
+df %>% 
+  mutate(x = 1) %>% 
+  mutate(turner = ifelse(artistId == 558 & artistRole == "artist", T, F)) %>% 
+  group_by(turner) %>% 
+  arrange(year) %>% 
+  mutate(counts = cumsum(x)) %>%
+  ggplot(aes(year, counts)) +
+  geom_point(aes(color=turner), show.legend = F, size=0.5, alpha=0.2) +
+  geom_point(aes(x=1856, y=37622), color="#006B38FF") +
+  geom_point(aes(x=2012, 26182), color="#101820FF") +
+  theme_minimal() +
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank()
+  ) +
+  scale_color_manual(values = c("#101820FF", "#006B38FF")) +
+  scale_y_log10()
+
+
+df %>% 
+  filter(artistId == 558) %>% 
+  group_by(artist, artistRole) %>% 
+  summarise(start = min(year, na.rm = T),
+            end = max(year, na.rm = T),
+            artworks = n())
+
+df %>% 
+  filter(artistId == 558) %>% pull(artistRole) %>% unique()
+  filter(year > 1850)
+  ggplot()+
+  geom_histogram(aes(year))
+  
+  
+max_point <- df %>% 
+  mutate(x = 1) %>% 
+  mutate(turner = ifelse(artistId == 558 & artistRole == "artist", T, F)) %>% 
+  group_by(turner) %>% 
+  arrange(year) %>% 
+  mutate(counts = cumsum(x)) %>% 
+  summarise(max_count = max(counts),
+            id = max(accession_number))
+
+
+df 
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
